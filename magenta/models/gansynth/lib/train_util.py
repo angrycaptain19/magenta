@@ -259,7 +259,7 @@ def make_var_scope_custom_getter_for_ema(ema):
   def _custom_getter(getter, name, *args, **kwargs):
     var = getter(name, *args, **kwargs)
     ema_var = ema.average(var)
-    return ema_var if ema_var else var
+    return ema_var or var
 
   return _custom_getter
 
@@ -400,7 +400,7 @@ def make_scaffold(stage_id, optimizer_var_list, **kwargs):
   def _init_fn(unused_scaffold, sess):
     # First initialize every variables.
     sess.run(init_op)
-    logging.info('\n'.join([var.name for var in restore_var_list]))
+    logging.info('\n'.join(var.name for var in restore_var_list))
     # Then overwrite variables saved in previous stage.
     if prev_ckpt is not None:
       saver_for_restore.restore(sess, prev_ckpt)

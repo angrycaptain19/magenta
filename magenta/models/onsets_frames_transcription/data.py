@@ -277,8 +277,7 @@ def truncate_note_sequence(sequence, truncate_secs):
     if start_time > truncate_secs:
       continue
 
-    if end_time > truncate_secs:
-      end_time = truncate_secs
+    end_time = min(end_time, truncate_secs)
 
     modified_note = truncated_seq.notes.add()
     modified_note.MergeFrom(note)
@@ -317,8 +316,7 @@ def parse_example(example_proto):
       'audio': tf.FixedLenFeature(shape=(), dtype=tf.string),
       'velocity_range': tf.FixedLenFeature(shape=(), dtype=tf.string),
   }
-  record = tf.parse_single_example(example_proto, features)
-  return record
+  return tf.parse_single_example(example_proto, features)
 
 
 def preprocess_example(example_proto, hparams, is_training):
@@ -557,8 +555,7 @@ def generate_sharded_filenames(sharded_filenames):
 def sharded_tfrecord_reader(fname):
   """Generator for reading TFRecord entries across multiple shards."""
   for sfname in generate_sharded_filenames(fname):
-    for r in tf.python_io.tf_record_iterator(sfname):
-      yield  r
+    yield from tf.python_io.tf_record_iterator(sfname)
 
 
 def read_examples(examples, is_training, shuffle_examples,
@@ -630,7 +627,7 @@ def parse_preprocessed_example(example_proto):
       'note_sequence': tf.FixedLenFeature(shape=(), dtype=tf.string),
   }
   record = tf.parse_single_example(example_proto, features)
-  input_tensors = InputTensors(
+  return InputTensors(
       spec=tf.sparse.to_dense(record['spec']),
       spectrogram_hash=record['spectrogram_hash'],
       labels=tf.sparse.to_dense(record['labels']),
@@ -641,7 +638,6 @@ def parse_preprocessed_example(example_proto):
       velocities=tf.sparse.to_dense(record['velocities']),
       sequence_id=record['sequence_id'],
       note_sequence=record['note_sequence'])
-  return input_tensors
 
 
 def create_batch(dataset, hparams, is_training, batch_size=None):

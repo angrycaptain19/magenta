@@ -118,10 +118,7 @@ def map_pianoroll(pianoroll,
   Returns:
     mapped_onset_predictions: The mapped onset_predictions.
   """
-  mapping = []
-  for m in HIT_MAPS[mapping_name]:
-    mapping.append([p - min_pitch for p in m])
-
+  mapping = [[p - min_pitch for p in m] for m in HIT_MAPS[mapping_name]]
   mapped_pitches = {pitches[0]: pitches for pitches in mapping}
   mapped_predictions = []
   for pitch in range(pianoroll.shape[1]):

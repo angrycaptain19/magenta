@@ -32,7 +32,7 @@ def _drums_only_metric_ops(features, labels, frame_probs, onset_probs,
   """Generate drum metrics: offsets/frames are ignored."""
   del frame_predictions, offset_predictions  # unused
 
-  metric_ops = metrics.define_metrics(
+  return metrics.define_metrics(
       frame_probs=frame_probs,
       onset_probs=onset_probs,
       frame_predictions=onset_predictions,
@@ -49,7 +49,6 @@ def _drums_only_metric_ops(features, labels, frame_probs, onset_probs,
       prefix='drums/',
       onsets_only=True,
       pitch_map=drum_mappings.GROOVE_PITCH_NAMES)
-  return metric_ops
 
 
 def get_metrics(features, labels, frame_probs, onset_probs, frame_predictions,

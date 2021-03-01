@@ -37,8 +37,7 @@ def velocity_range_from_sequence(ns):
   velocities = [note.velocity for note in ns.notes]
   velocity_max = np.max(velocities) if velocities else 0
   velocity_min = np.min(velocities) if velocities else 0
-  velocity_range = music_pb2.VelocityRange(min=velocity_min, max=velocity_max)
-  return velocity_range
+  return music_pb2.VelocityRange(min=velocity_min, max=velocity_max)
 
 
 def find_inactive_ranges(note_sequence):
@@ -221,7 +220,7 @@ def create_example(example_id, ns, wav_data, velocity_range=None):
   # sustain processing.
   sus_ns = sequences_lib.apply_sustain_control_changes(ns)
 
-  example = tf.train.Example(
+  return tf.train.Example(
       features=tf.train.Features(
           feature={
               'id':
@@ -240,7 +239,6 @@ def create_example(example_id, ns, wav_data, velocity_range=None):
                       bytes_list=tf.train.BytesList(
                           value=[velocity_range.SerializeToString()])),
           }))
-  return example
 
 
 def process_record(wav_data,

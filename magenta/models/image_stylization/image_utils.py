@@ -154,10 +154,6 @@ def style_image_inputs(style_dataset_file, batch_size=None, image_size=None,
     ValueError: if center cropping is requested but no image size is provided,
         or if batch size is specified but center-cropping is not requested.
   """
-  vgg_layers = ['vgg_16/conv1', 'vgg_16/pool1', 'vgg_16/conv2', 'vgg_16/pool2',
-                'vgg_16/conv3', 'vgg_16/pool3', 'vgg_16/conv4', 'vgg_16/pool4',
-                'vgg_16/conv5', 'vgg_16/pool5']
-
   if square_crop and image_size is None:
     raise ValueError('center-cropping requires specifying the image size.')
   if batch_size is not None and not square_crop:
@@ -198,6 +194,10 @@ def style_image_inputs(style_dataset_file, batch_size=None, image_size=None,
                   'vgg_16/pool5': tf.FixedLenFeature([512, 512], tf.float32)})
     image = tf.image.decode_jpeg(features['image_raw'])
     label = features['label']
+    vgg_layers = ['vgg_16/conv1', 'vgg_16/pool1', 'vgg_16/conv2', 'vgg_16/pool2',
+                  'vgg_16/conv3', 'vgg_16/pool3', 'vgg_16/conv4', 'vgg_16/pool4',
+                  'vgg_16/conv5', 'vgg_16/pool5']
+
     gram_matrices = [features[vgg_layer] for vgg_layer in vgg_layers]
     image.set_shape([None, None, 3])
 
@@ -219,9 +219,8 @@ def style_image_inputs(style_dataset_file, batch_size=None, image_size=None,
       image, label = image_label_gram_matrices[:2]
       gram_matrices = image_label_gram_matrices[2:]
 
-    gram_matrices = dict((vgg_layer, gram_matrix)
-                         for vgg_layer, gram_matrix
-                         in zip(vgg_layers, gram_matrices))
+    gram_matrices = {vgg_layer: gram_matrix for vgg_layer, gram_matrix
+                             in zip(vgg_layers, gram_matrices)}
     return image, label, gram_matrices
 
 

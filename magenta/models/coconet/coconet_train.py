@@ -193,11 +193,12 @@ def run_epoch(supervisor, sess, m, dataset, hparams, eval_op, experiment_type,
       losses.add(loss, 1)
 
   # Collect run statistics.
-  run_stats = dict()
-  run_stats['loss_mask'] = losses_mask.mean
-  run_stats['loss_unmask'] = losses_unmask.mean
-  run_stats['loss_total'] = losses_total.mean
-  run_stats['loss'] = losses.mean
+  run_stats = {
+      'loss_mask': losses_mask.mean,
+      'loss_unmask': losses_unmask.mean,
+      'loss_total': losses_total.mean,
+      'loss': losses.mean,
+  }
   if experiment_type == 'train':
     run_stats['learning_rate'] = float(learning_rate)
 
@@ -372,9 +373,9 @@ def _hparams_from_flags():
       rescale_loss patience corrupt_ratio eval_freq run_id
       num_pointwise_splits interleave_split_every_n_layers
       """.split())
-  hparams = lib_hparams.Hyperparameters(**dict(
-      (key, getattr(FLAGS, key)) for key in keys))
-  return hparams
+  return lib_hparams.Hyperparameters(
+      **{key: getattr(FLAGS, key)
+         for key in keys})
 
 
 if __name__ == '__main__':

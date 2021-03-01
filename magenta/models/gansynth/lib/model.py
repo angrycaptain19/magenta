@@ -293,8 +293,7 @@ class Model(object):
       new_mag_max = get_max(new_mag)
       mag_scale = tf.maximum(1.0, tf.maximum(mag_max, new_mag_max))
       mag_diff = (mag - new_mag) / mag_scale
-      mag_loss = tf.reduce_mean(tf.square(mag_diff))
-      return mag_loss
+      return tf.reduce_mean(tf.square(mag_diff))
 
     with tf.name_scope('losses'):
       # Loss weights

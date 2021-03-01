@@ -132,7 +132,7 @@ class Hyperparameters(object):
       setattr(self, key, value)
 
   def _filter_and_check_legacy_hparams(self, dikt):
-    legacy_hparams = dict()
+    legacy_hparams = {}
     for l_hparam in Hyperparameters._LEGACY_HPARAM_NAMES:
       if l_hparam in dikt:
         legacy_hparams[l_hparam] = dikt[l_hparam]
@@ -191,11 +191,8 @@ class Hyperparameters(object):
 
   @property
   def use_softmax_loss(self):
-    if not self.separate_instruments and (self.num_instruments > 1 or
-                                          self.num_instruments == 0):
-      return False
-    else:
-      return True
+    return bool(self.separate_instruments
+                or self.num_instruments <= 1 and self.num_instruments != 0)
 
   def __str__(self):
     """Get all hyperparameters as a string."""
@@ -218,9 +215,8 @@ class Hyperparameters(object):
         rescale_loss='rescale',
         maskout_method='mm')
     sorted_keys = sorted(shorthand.keys())
-    line = ','.join(
+    return ','.join(
         '%s=%s' % (shorthand[key], getattr(self, key)) for key in sorted_keys)
-    return line
 
   def get_conv_arch(self):
     """Returns the model architecture."""

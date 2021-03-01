@@ -186,8 +186,7 @@ class Generator(object):
     # Logs final step
     self.logger.log(pianorolls=pianorolls)
 
-    midi_outs = get_midi_from_pianorolls(pianorolls, self.decoder)
-    return midi_outs
+    return get_midi_from_pianorolls(pianorolls, self.decoder)
 
   @property
   def pianorolls(self):
@@ -269,8 +268,7 @@ class TFGenerator(object):
     self._pianorolls = results["pianorolls"]
     self._time_taken = results["time_taken"]
     tf.logging.info("output pianorolls shape: %r", self.pianorolls.shape)
-    midi_outs = get_midi_from_pianorolls(self.pianorolls, self.endecoder)
-    return midi_outs
+    return get_midi_from_pianorolls(self.pianorolls, self.endecoder)
 
   @property
   def pianorolls(self):
@@ -300,9 +298,8 @@ def save_midis(midi_datas, midi_path, label=""):
 
 
 def instantiate_model(checkpoint, instantiate_sess=True):
-  wmodel = lib_graph.load_checkpoint(
+  return lib_graph.load_checkpoint(
       checkpoint, instantiate_sess=instantiate_sess)
-  return wmodel
 
 
 ##################

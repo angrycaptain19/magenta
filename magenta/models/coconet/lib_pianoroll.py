@@ -25,14 +25,13 @@ class PitchOutOfEncodeRangeError(Exception):
 
 
 def get_pianoroll_encoder_decoder(hparams):
-  encoder_decoder = PianorollEncoderDecoder(
+  return PianorollEncoderDecoder(
       shortest_duration=hparams.shortest_duration,
       min_pitch=hparams.min_pitch,
       max_pitch=hparams.max_pitch,
       separate_instruments=hparams.separate_instruments,
       num_instruments=hparams.num_instruments,
       quantization_level=hparams.quantization_level)
-  return encoder_decoder
 
 
 class PianorollEncoderDecoder(object):
@@ -185,7 +184,7 @@ class PianorollEncoderDecoder(object):
         for instr in midi.instruments
     ]
     if len(instr_rolls) != ii:
-      for unused_i in range(ii - len(instr_rolls)):
+      for _ in range(ii - len(instr_rolls)):
         instr_rolls.append(np.zeros_like(instr_rolls[0]))
 
     max_tt = np.max([roll.shape[0] for roll in instr_rolls])

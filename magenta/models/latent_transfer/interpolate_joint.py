@@ -157,16 +157,14 @@ def main(unused_argv):
     index_list_B.append(index_grouped_by_label_B[label][last_pos[label]])
     last_pos[label] -= 1
 
-  z_A = []
-  z_A.append(train_mu_A[index_list_A[0]])
+  z_A = [train_mu_A[index_list_A[0]]]
   for i_label in range(1, len(interpolate_labels)):
     last_z_A = z_A[-1]
     this_z_A = train_mu_A[index_list_A[i_label]]
     for j in range(1, nb_images_between_labels + 1):
       z_A.append(last_z_A +
                  (this_z_A - last_z_A) * (float(j) / nb_images_between_labels))
-  z_B = []
-  z_B.append(train_mu_B[index_list_B[0]])
+  z_B = [train_mu_B[index_list_B[0]]]
   for i_label in range(1, len(interpolate_labels)):
     last_z_B = z_B[-1]
     this_z_B = train_mu_B[index_list_B[i_label]]

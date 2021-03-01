@@ -184,7 +184,7 @@ class Batch(object):
       A feed dict mapping the given placeholders to the data in this batch.
     """
     assert set(placeholders.keys()) == self.keys
-    return dict((placeholders[key], self.features[key]) for key in self.keys)
+    return {placeholders[key]: self.features[key] for key in self.keys}
 
   def batches(self, **batches_kwargs):
     """Iterate over sub-batches of this batch.

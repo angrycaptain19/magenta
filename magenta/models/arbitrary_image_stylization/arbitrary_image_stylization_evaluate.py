@@ -109,10 +109,7 @@ def main(_):
     tf.summary.image('image/{}/3_stylized_noise'.format(FLAGS.eval_name),
                      stylized_noise, 3)
 
-    metrics = {}
-    for key, value in loss_dict.items():
-      metrics[key] = tf.metrics.mean(value)
-
+    metrics = {key: tf.metrics.mean(value) for key, value in loss_dict.items()}
     names_values, names_updates = slim.metrics.aggregate_metric_map(metrics)
     for name, value in names_values.items():
       slim.summaries.add_scalar_summary(value, name, print_summary=True)

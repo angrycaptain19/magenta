@@ -386,10 +386,9 @@ def dynamic_decode(decoder,
       if (not isinstance(from_shape, tf.TensorShape) or
           from_shape.ndims == 0):
         return None
-      else:
-        batch_size = tensor_util.constant_value(
-            tf.convert_to_tensor(batch_size, name="batch_size"))
-        return tf.TensorShape([batch_size]).concatenate(from_shape)
+      batch_size = tensor_util.constant_value(
+          tf.convert_to_tensor(batch_size, name="batch_size"))
+      return tf.TensorShape([batch_size]).concatenate(from_shape)
 
     dynamic_size = maximum_iterations is None or not is_xla
 
@@ -758,9 +757,8 @@ class TrainingHelper(Helper):
 
   def sample(self, time, outputs, name=None, **unused_kwargs):
     with tf.name_scope(name, "TrainingHelperSample", [time, outputs]):
-      sample_ids = tf.cast(
+      return tf.cast(
           tf.argmax(outputs, axis=-1), tf.int32)
-      return sample_ids
 
   def next_inputs(self, time, outputs, state, name=None, **unused_kwargs):
     """next_inputs_fn for TrainingHelper."""
@@ -1017,18 +1015,17 @@ class BasicDecoder(Decoder):
     size = self._cell.output_size
     if self._output_layer is None:
       return size
-    else:
-      # To use layer's compute_output_shape, we need to convert the
-      # RNNCell's output_size entries into shapes with an unknown
-      # batch size.  We then pass this through the layer's
-      # compute_output_shape and read off all but the first (batch)
-      # dimensions to get the output size of the rnn with the layer
-      # applied to the top.
-      output_shape_with_unknown_batch = tf.nest.map_structure(
-          lambda s: tf.TensorShape([None]).concatenate(s), size)
-      layer_output_shape = self._output_layer.compute_output_shape(
-          output_shape_with_unknown_batch)
-      return tf.nest.map_structure(lambda s: s[1:], layer_output_shape)
+    # To use layer's compute_output_shape, we need to convert the
+    # RNNCell's output_size entries into shapes with an unknown
+    # batch size.  We then pass this through the layer's
+    # compute_output_shape and read off all but the first (batch)
+    # dimensions to get the output size of the rnn with the layer
+    # applied to the top.
+    output_shape_with_unknown_batch = tf.nest.map_structure(
+        lambda s: tf.TensorShape([None]).concatenate(s), size)
+    layer_output_shape = self._output_layer.compute_output_shape(
+        output_shape_with_unknown_batch)
+    return tf.nest.map_structure(lambda s: s[1:], layer_output_shape)
 
   @property
   def output_size(self):

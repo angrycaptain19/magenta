@@ -161,19 +161,17 @@ class MidiSignal(object):
   def __str__(self):
     """Returns a regex pattern for matching against a mido.Message string."""
     if self._msg is not None:
-      regex_pattern = '^' + mido.messages.format_as_string(
+      return '^' + mido.messages.format_as_string(
           self._msg, include_time=False) + r' time=\d+.\d+$'
-    else:
-      # Generate regex pattern.
-      parts = ['.*' if self._type is None else self._type]
-      for name in mido.messages.SPEC_BY_TYPE[self._inferred_types[0]][
-          'value_names']:
-        if name in self._kwargs:
-          parts.append('%s=%d' % (name, self._kwargs[name]))
-        else:
-          parts.append(r'%s=\d+' % name)
-      regex_pattern = '^' + ' '.join(parts) + r' time=\d+.\d+$'
-    return regex_pattern
+    # Generate regex pattern.
+    parts = ['.*' if self._type is None else self._type]
+    for name in mido.messages.SPEC_BY_TYPE[self._inferred_types[0]][
+        'value_names']:
+      if name in self._kwargs:
+        parts.append('%s=%d' % (name, self._kwargs[name]))
+      else:
+        parts.append(r'%s=\d+' % name)
+    return '^' + ' '.join(parts) + r' time=\d+.\d+$'
 
 
 class Metronome(threading.Thread):
@@ -818,7 +816,7 @@ class PolyphonicMidiCaptor(MidiCaptor):
 
   def __init__(self, *args, **kwargs):
     # A dictionary of open NoteSequence.Note messages keyed by pitch.
-    self._open_notes = dict()
+    self._open_notes = {}
     super(PolyphonicMidiCaptor, self).__init__(*args, **kwargs)
 
   @concurrency.serialized

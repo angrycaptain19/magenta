@@ -81,9 +81,7 @@ class DataTest(tf.test.TestCase):
     else:
       labels = labels[0:truncated_length]
 
-    inputs = [(spec, labels, truncated_length, filename)]
-
-    return inputs
+    return [(spec, labels, truncated_length, filename)]
 
   def _ExampleToInputs(self,
                        ex,

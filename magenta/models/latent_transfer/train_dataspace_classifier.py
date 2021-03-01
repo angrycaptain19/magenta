@@ -133,13 +133,13 @@ def main(unused_argv):
         batch = eval_data[start:end]
         labels = attr_eval[start:end]
 
-        if batch.shape[0] == batch_size:
-          res_eval = sess.run([m.classifier_loss, scalar_summaries], {
-              m.x: batch,
-              m.labels: labels,
-          })
-          traces['loss_eval'].append(res_eval[0])
-          eval_writer.add_summary(res_eval[-1], i)
+      if batch.shape[0] == batch_size:
+        res_eval = sess.run([m.classifier_loss, scalar_summaries], {
+            m.x: batch,
+            m.labels: labels,
+        })
+        traces['loss_eval'].append(res_eval[0])
+        eval_writer.add_summary(res_eval[-1], i)
 
     if i % FLAGS.n_iters_per_save == 0:
       smoothed_eval_loss = np.mean(traces['loss_eval'][-running_N_eval:])

@@ -293,14 +293,12 @@ class BaseLstmDecoder(base_model.BaseDecoder):
         maximum_iterations=max_length,
         swap_memory=True,
         scope='decoder')
-    results = lstm_utils.LstmDecodeResults(
+    return lstm_utils.LstmDecodeResults(
         rnn_input=final_output.rnn_input[:, :, :self._output_depth],
         rnn_output=final_output.rnn_output,
         samples=final_output.sample_id,
         final_state=final_state,
         final_sequence_lengths=final_lengths)
-
-    return results
 
   def reconstruction_loss(self, x_input, x_target, x_length, z=None,
                           c_input=None):
@@ -685,14 +683,14 @@ class SplitMultiOutLstmDecoder(base_model.BaseDecoder):
 
   def _merge_decode_results(self, decode_results):
     """Merge in the output dimension."""
-    output_axis = -1
     assert decode_results
     zipped_results = lstm_utils.LstmDecodeResults(*list(zip(*decode_results)))
     with tf.control_dependencies([
-        tf.assert_equal(
-            zipped_results.final_sequence_lengths, self.hparams.max_seq_len,
-            message='Variable length not supported by '
-                    'MultiOutCategoricalLstmDecoder.')]):
+          tf.assert_equal(
+              zipped_results.final_sequence_lengths, self.hparams.max_seq_len,
+              message='Variable length not supported by '
+                      'MultiOutCategoricalLstmDecoder.')]):
+      output_axis = -1
       if zipped_results.final_state[0] is None:
         final_state = None
       else:
@@ -977,16 +975,16 @@ class HierarchicalLstmDecoder(base_model.BaseDecoder):
           output, state = self._hier_cells[level](next_input, state, scope)
         next_input = recursive_decode(output, path + [i])
         lower_level_embeddings.append(next_input)
-      if self._hierarchical_encoder:
-        # Return the encoding of the outputs using the appropriate level of the
-        # hierarchical encoder.
-        enc_level = num_levels - level
-        return self._hierarchical_encoder.level(enc_level).encode(
-            sequence=tf.stack(lower_level_embeddings, axis=1),
-            sequence_length=tf.fill([batch_size], num_steps))
-      else:
+      if not self._hierarchical_encoder:
         # Return the final state.
         return tf.concat(tf.nest.flatten(state), axis=-1)
+
+      # Return the encoding of the outputs using the appropriate level of the
+      # hierarchical encoder.
+      enc_level = num_levels - level
+      return self._hierarchical_encoder.level(enc_level).encode(
+          sequence=tf.stack(lower_level_embeddings, axis=1),
+          sequence_length=tf.fill([batch_size], num_steps))
 
     return recursive_decode(z)
 
@@ -1057,7 +1055,6 @@ class HierarchicalLstmDecoder(base_model.BaseDecoder):
 
     def base_train_fn(embedding, hier_index):
       """Base function for training hierarchical decoder."""
-      split_size = self._level_lengths[-1]
       split_input = hier_input[hier_index]
       split_target = hier_target[hier_index]
       split_length = hier_length[hier_index]
@@ -1073,6 +1070,7 @@ class HierarchicalLstmDecoder(base_model.BaseDecoder):
         # Get the approximate "sample" from the model.
         # Start with the inputs the RNN saw (excluding the start token).
         samples = decode_results.rnn_input[:, 1:]
+        split_size = self._level_lengths[-1]
         # Pad to be the max length.
         samples = tf.pad(
             samples,

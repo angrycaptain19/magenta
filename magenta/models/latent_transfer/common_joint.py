@@ -202,8 +202,7 @@ class GuasssianDataHelper(object):
     """Pick a batch where instances are sampled from Guassian distributions."""
     mu, sigma = self.mu, self.sigma
     batch_mu, batch_sigma = self._np_index_arrs(batch_index, mu, sigma)
-    batch = self._np_sample_from_gaussian(batch_mu, batch_sigma)
-    return batch
+    return self._np_sample_from_gaussian(batch_mu, batch_sigma)
 
   def __len__(self):
     return len(self.mu)

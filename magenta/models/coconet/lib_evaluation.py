@@ -107,13 +107,12 @@ class BaseEvaluator(lib_util.Factory):
     self.chronological = chronological
 
     def predictor(pianorolls, masks):
-      p = self.wmodel.sess.run(
+      return self.wmodel.sess.run(
           self.wmodel.model.predictions,
           feed_dict={
               self.wmodel.model.pianorolls: pianorolls,
               self.wmodel.model.masks: masks
           })
-      return p
 
     self.predictor = lib_tfutil.RobustPredictor(predictor)
 

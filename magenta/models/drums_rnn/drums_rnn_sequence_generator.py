@@ -124,9 +124,10 @@ class DrumsRnnSequenceGenerator(sequence_generator.BaseSequenceGenerator):
         'branch_factor': lambda arg: arg.int_value,
         'steps_per_iteration': lambda arg: arg.int_value
     }
-    args = dict((name, value_fn(generator_options.args[name]))
-                for name, value_fn in arg_types.items()
-                if name in generator_options.args)
+    args = {
+        name: value_fn(generator_options.args[name])
+        for name, value_fn in arg_types.items() if name in generator_options.args
+    }
 
     generated_drums = self._model.generate_drum_track(
         end_step - drums.start_step, drums, **args)

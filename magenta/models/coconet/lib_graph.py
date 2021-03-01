@@ -241,9 +241,9 @@ class CoconetGraph(object):
       # shape mismatch; e.g. change in number of filters
       self.residual_reset()
       return x
-    if self.residual_counter % self.residual_period == 0:
-      if not is_first and not is_last:
-        x += self.output_for_residual
+    if (self.residual_counter % self.residual_period == 0 and not is_first
+        and not is_last):
+      x += self.output_for_residual
     return x
 
   def apply_convolution(self, x, layer, layer_idx):
@@ -302,13 +302,11 @@ class CoconetGraph(object):
 
     # Compute batch normalization or add biases.
     if self.hparams.batch_norm:
-      y = self.apply_batchnorm(conv)
-    else:
-      biases = tf.get_variable(
-          'bias', [conv.get_shape()[-1]],
-          initializer=tf.constant_initializer(0.0))
-      y = tf.nn.bias_add(conv, biases)
-    return y
+      return self.apply_batchnorm(conv)
+    biases = tf.get_variable(
+        'bias', [conv.get_shape()[-1]],
+        initializer=tf.constant_initializer(0.0))
+    return tf.nn.bias_add(conv, biases)
 
   def apply_batchnorm(self, x):
     """Normalizes batch w/ moving population stats for training, o/w batch."""

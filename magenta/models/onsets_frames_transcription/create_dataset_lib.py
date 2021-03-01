@@ -76,21 +76,20 @@ def generate_mixes(val, num_mixes, sourceid_to_exids, seed=0):
     raise ValueError(
         'Requested {} mixes, but {} mixes needed to use all examples.'.format(
             num_mixes, len(mixes)))
-  else:
-    # We need more mixes, so generate some random ones, then crop the excess
-    # from the random mixes, ensuring that we preserve the mixes that use every
-    # example at least once.
-    num_mixes_remaining = num_mixes - len(mixes)
-    random_example_mixes = generate_mixes_random_examples(
-        sourceid_to_exids_dict, num_mixes_remaining, rs)
-    # If the random mixes happened to include any of the mixes we already
-    # generated, remove them.
-    random_example_mixes -= mixes
-    # Do a random crop.
-    random_example_mixes_list = list(random_example_mixes)
-    rs.shuffle(random_example_mixes_list)
-    # Combine the two mix lists.
-    unique_mixes = list(mixes) + random_example_mixes_list[:num_mixes_remaining]
+  # We need more mixes, so generate some random ones, then crop the excess
+  # from the random mixes, ensuring that we preserve the mixes that use every
+  # example at least once.
+  num_mixes_remaining = num_mixes - len(mixes)
+  random_example_mixes = generate_mixes_random_examples(
+      sourceid_to_exids_dict, num_mixes_remaining, rs)
+  # If the random mixes happened to include any of the mixes we already
+  # generated, remove them.
+  random_example_mixes -= mixes
+  # Do a random crop.
+  random_example_mixes_list = list(random_example_mixes)
+  rs.shuffle(random_example_mixes_list)
+  # Combine the two mix lists.
+  unique_mixes = list(mixes) + random_example_mixes_list[:num_mixes_remaining]
 
   keyed_mixes = dict(enumerate(unique_mixes))
   exid_to_mixids = collections.defaultdict(list)

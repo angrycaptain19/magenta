@@ -82,7 +82,7 @@ class RNNCellTest(tf.test.TestCase):
       with tf.Graph().as_default():
         with self.cached_session() as sess:
           with tf.variable_scope(
-              "state_is_tuple_" + str(state_is_tuple)):
+                      "state_is_tuple_" + str(state_is_tuple)):
             lstm_cell = rnn_cell.BasicLSTMCell(
                 num_units, state_is_tuple=state_is_tuple)
             cell = contrib_rnn.AttentionCellWrapper(
@@ -118,8 +118,7 @@ class RNNCellTest(tf.test.TestCase):
                   num_units * 2 + num_units + attn_length * num_units
               ])
               tensors = [output, state]
-            zero_result = sum(
-                [tf.reduce_sum(tf.abs(x)) for x in tensors])
+            zero_result = sum(tf.reduce_sum(tf.abs(x)) for x in tensors)
             sess.run(tf.global_variables_initializer())
             self.assertLess(sess.run(zero_result), 1e-6)
 
@@ -511,8 +510,7 @@ class LSTMBlockCellTest(tf.test.TestCase, parameterized.TestCase):
       output, _ = tf.nn.dynamic_rnn(
           cell, x, time_major=True, dtype=tf.float32)
       sess.run(tf.global_variables_initializer())
-      feed = {}
-      feed[x] = np.random.randn(num_steps, batch_size, input_dim)
+      feed = {x: np.random.randn(num_steps, batch_size, input_dim)}
       sess.run(output, feed)
 
   def testLSTMBlockCell(self):
@@ -896,10 +894,7 @@ class LayerNormBasicLSTMCellTest(tf.test.TestCase):
       return delta < 10**(-digits)
 
     def _is_close_in(x, items, digits=4):
-      for i in items:
-        if _is_close(x, i, digits):
-          return True
-      return False
+      return any(_is_close(x, i, digits) for i in items)
 
     keep_prob = 0.5
     c_high = 2.9998924946

@@ -69,8 +69,7 @@ class NSynthDataset(object):
         "instrument_source": tf.FixedLenFeature([1], dtype=tf.int64),
         "instrument_family": tf.FixedLenFeature([1], dtype=tf.int64),
     }
-    example = tf.parse_single_example(serialized_example, features)
-    return example
+    return tf.parse_single_example(serialized_example, features)
 
   def get_wavenet_batch(self, batch_size, length=64000):
     """Get the Tensor expressions from the reader.
@@ -91,25 +90,17 @@ class NSynthDataset(object):
     if self.is_training:
       # random crop
       crop = tf.random_crop(wav, [length])
-      crop = tf.reshape(crop, [1, length])
-      key, crop, pitch = tf.train.shuffle_batch(
-          [key, crop, pitch],
-          batch_size,
-          num_threads=4,
-          capacity=500 * batch_size,
-          min_after_dequeue=200 * batch_size)
     else:
       # fixed center crop
       offset = (64000 - length) // 2  # 24320
       crop = tf.slice(wav, [offset], [length])
-      crop = tf.reshape(crop, [1, length])
-      key, crop, pitch = tf.train.shuffle_batch(
-          [key, crop, pitch],
-          batch_size,
-          num_threads=4,
-          capacity=500 * batch_size,
-          min_after_dequeue=200 * batch_size)
-
+    crop = tf.reshape(crop, [1, length])
+    key, crop, pitch = tf.train.shuffle_batch(
+        [key, crop, pitch],
+        batch_size,
+        num_threads=4,
+        capacity=500 * batch_size,
+        min_after_dequeue=200 * batch_size)
     crop = tf.reshape(tf.cast(crop, tf.float32), [batch_size, length])
     pitch = tf.cast(pitch, tf.int32)
     return {"pitch": pitch, "wav": crop, "key": key}
@@ -187,7 +178,7 @@ class NSynthDataset(object):
 
     audio.set_shape([hparams.batch_size, 64000])
 
-    batch = dict(
+    return dict(
         pitch=pitch,
         velocity=velocity,
         audio=audio,
@@ -195,5 +186,3 @@ class NSynthDataset(object):
         instrument_family=instrument_family,
         qualities=qualities,
         spectrogram=specgram)
-
-    return batch

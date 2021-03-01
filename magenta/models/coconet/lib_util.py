@@ -61,21 +61,19 @@ def sample_bernoulli(p, temperature=1):
     A binary array of sampled values, the same shape as `p`.
   """
   if temperature == 0.:
-    sampled = p > 0.5
-  else:
-    pp = np.stack([p, 1 - p])
-    logpp = np.log(pp)
-    logpp /= temperature
-    logpp -= logpp.max(axis=0, keepdims=True)
-    p = np.exp(logpp)
-    p /= p.sum(axis=0)
-    print("%.5f < %.5f < %.5f < %.5f < %.5g" % (np.min(p), np.percentile(p, 25),
-                                                np.percentile(p, 50),
-                                                np.percentile(p, 75),
-                                                np.max(p)))
+    return p > 0.5
+  pp = np.stack([p, 1 - p])
+  logpp = np.log(pp)
+  logpp /= temperature
+  logpp -= logpp.max(axis=0, keepdims=True)
+  p = np.exp(logpp)
+  p /= p.sum(axis=0)
+  print("%.5f < %.5f < %.5f < %.5f < %.5g" % (np.min(p), np.percentile(p, 25),
+                                              np.percentile(p, 50),
+                                              np.percentile(p, 75),
+                                              np.max(p)))
 
-    sampled = np.random.random(p.shape) < p
-  return sampled
+  return np.random.random(p.shape) < p
 
 
 def softmax(p, axis=None, temperature=1):
@@ -172,8 +170,7 @@ def deepsubclasses(klass):
   """Iterate over direct and indirect subclasses of `klass`."""
   for subklass in klass.__subclasses__():
     yield subklass
-    for subsubklass in deepsubclasses(subklass):
-      yield subsubklass
+    yield from deepsubclasses(subklass)
 
 
 class Factory(object):
@@ -358,6 +355,6 @@ def eqzip(*xss):
   """
   xss = list(map(list, xss))
   lengths = list(map(len, xss))
-  if not all(length == lengths[0] for length in lengths):
+  if any(length != lengths[0] for length in lengths):
     raise ValueError("eqzip got iterables of unequal lengths %s" % lengths)
   return zip(*xss)

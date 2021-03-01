@@ -44,14 +44,13 @@ import tensorflow.compat.v1 as tf
 def _stft_magnitude_full_tf(waveform_input, window_length_samples,
                             hop_length_samples, fft_length):
   """Calculate STFT magnitude (spectrogram) using tf.signal ops."""
-  stft_magnitude = tf.abs(
+  return tf.abs(
       tf.signal.stft(
           waveform_input,
           frame_length=window_length_samples,
           frame_step=hop_length_samples,
           fft_length=fft_length),
       name='magnitude_spectrogram')
-  return stft_magnitude
 
 
 def _dft_matrix(dft_length):
@@ -110,10 +109,7 @@ def _fixed_frame(signal, frame_length, frame_step, first_axis=False):
       supports framing of signals whose shape is fixed at graph-build time.
   """
   signal_shape = signal.shape.as_list()
-  if first_axis:
-    length_samples = signal_shape[0]
-  else:
-    length_samples = signal_shape[-1]
+  length_samples = signal_shape[0] if first_axis else signal_shape[-1]
   if length_samples <= 0:
     raise ValueError('fixed framing requires predefined constant signal length')
   num_frames = max(0, 1 + (length_samples - frame_length) // frame_step)
@@ -163,10 +159,9 @@ def _fixed_frame(signal, frame_length, frame_step, first_axis=False):
   # dimension to stitch the subframes together into frames. For example:
   # [[0, 1, 2, 3], [2, 3, 4, 5], [4, 5, 6, 7]].
   selector = frame_selector + subframe_selector
-  frames = tf.reshape(
+  return tf.reshape(
       tf.gather(subframes, selector.astype(np.int32), axis=gather_axis),
       result_shape)
-  return frames
 
 
 def _stft_tflite(signal, frame_length, frame_step, fft_length):
@@ -212,10 +207,9 @@ def _stft_magnitude_tflite(waveform_input, window_length_samples,
       frame_length=window_length_samples,
       frame_step=hop_length_samples,
       fft_length=fft_length)
-  stft_magnitude = tf.sqrt(
+  return tf.sqrt(
       tf.add(real_stft * real_stft, imag_stft * imag_stft),
       name='magnitude_spectrogram')
-  return stft_magnitude
 
 
 def build_mel_calculation_graph(waveform_input,

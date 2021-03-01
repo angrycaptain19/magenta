@@ -107,8 +107,7 @@ def get_checkpoint():
     raise sequence_generator.SequenceGeneratorError(
         'Cannot specify both bundle_file and run_dir or checkpoint_file')
   if FLAGS.run_dir:
-    train_dir = os.path.join(os.path.expanduser(FLAGS.run_dir), 'train')
-    return train_dir
+    return os.path.join(os.path.expanduser(FLAGS.run_dir), 'train')
   elif FLAGS.checkpoint_file:
     return os.path.expanduser(FLAGS.checkpoint_file)
   else:
@@ -151,7 +150,7 @@ def run_with_flags(generator):
     tf.gfile.MakeDirs(FLAGS.output_dir)
 
   primer_sequence = None
-  qpm = FLAGS.qpm if FLAGS.qpm else note_seq.DEFAULT_QUARTERS_PER_MINUTE
+  qpm = FLAGS.qpm or note_seq.DEFAULT_QUARTERS_PER_MINUTE
   if FLAGS.primer_drums:
     primer_drums = note_seq.DrumTrack([
         frozenset(pitches) for pitches in ast.literal_eval(FLAGS.primer_drums)

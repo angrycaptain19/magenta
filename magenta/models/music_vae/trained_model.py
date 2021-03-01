@@ -256,7 +256,7 @@ class TrainedModel(object):
         [(0, batch_pad_amt)] + [(0, 0)] * (length_array.ndim - 1),
         'constant')
 
-    max_length = max([len(t) for t in input_tensors])
+    max_length = max(len(t) for t in input_tensors)
     inputs_array = np.zeros(
         [len(input_tensors), max_length, input_depth])
     for i, t in enumerate(input_tensors):

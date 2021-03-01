@@ -94,8 +94,10 @@ def main(unused_argv=None):
       # Rescale style weights dynamically based on the current style image
       style_coefficient = tf.gather(
           tf.constant(style_coefficients), style_labels)
-      style_weights = dict((key, style_coefficient * style_weights[key])
-                           for key in style_weights)
+      style_weights = {
+          key: style_coefficient * style_weights[key]
+          for key in style_weights
+      }
 
       # Define the model
       stylized_inputs = model.transform(

@@ -109,7 +109,7 @@ def _load_celeba(data_path, postfix):
 
 def dataset_is_mnist_family(dataset):
   """returns if dataset is of MNIST family."""
-  return dataset.lower() == 'mnist' or dataset.lower() == 'fashion-mnist'
+  return dataset.lower() in ['mnist', 'fashion-mnist']
 
 
 def load_dataset(config):
@@ -195,8 +195,7 @@ def batch_image(b, max_images=64, rows=None, cols=None):
   diff = rows * cols - mb
   b = np.vstack([b[:mb], np.zeros([diff, b.shape[1], b.shape[2], b.shape[3]])])
   tmp = b.reshape(-1, cols * b.shape[1], b.shape[2], b.shape[3])
-  img = np.hstack(tmp[i] for i in range(rows))
-  return img
+  return np.hstack(tmp[i] for i in range(rows))
 
 
 def save_image(img, filepath):
@@ -234,20 +233,19 @@ def make_batch_image_grid(dim_grid, number_grid):
   """Returns a patched `make_grid` function for grid."""
   assert dim_grid in (1, 2)
   if dim_grid == 1:
-    batch_image_grid = functools.partial(
+    return functools.partial(
         batch_image,
         max_images=number_grid,
         rows=1,
         cols=number_grid,
     )
   else:
-    batch_image_grid = functools.partial(
+    return functools.partial(
         batch_image,
         max_images=number_grid * number_grid,
         rows=number_grid,
         cols=number_grid,
     )
-  return batch_image_grid
 
 
 def post_proc(img, config):
