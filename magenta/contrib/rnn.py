@@ -871,8 +871,7 @@ class LayerNormBasicLSTMCell(rnn_cell.RNNCell):
       # Initialize beta and gamma for use by layer_norm.
       tf.get_variable("gamma", shape=shape, initializer=gamma_init, dtype=dtype)
       tf.get_variable("beta", shape=shape, initializer=beta_init, dtype=dtype)
-    normalized = tf_slim.layer_norm(inp, reuse=True, scope=scope)
-    return normalized
+    return tf_slim.layer_norm(inp, reuse=True, scope=scope)
 
   def _linear(self, args):
     out_size = 4 * self._num_units

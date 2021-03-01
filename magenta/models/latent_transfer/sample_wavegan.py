@@ -66,11 +66,10 @@ def main(unused_argv):
     if use_gaussian_pretrained_model:
       saver_gan = tf.train.import_meta_graph(
           os.path.join(gen_ckpt_dir, '..', 'infer', 'infer.meta'))
-      saver_gan.restore(sess_gan, os.path.join(gen_ckpt_dir, 'model.ckpt'))
     else:
       saver_gan = tf.train.import_meta_graph(
           os.path.join(gen_ckpt_dir, 'infer.meta'))
-      saver_gan.restore(sess_gan, os.path.join(gen_ckpt_dir, 'model.ckpt'))
+    saver_gan.restore(sess_gan, os.path.join(gen_ckpt_dir, 'model.ckpt'))
   # - classifier (inception)
   graph_class = tf.Graph()
   with graph_class.as_default():
@@ -141,9 +140,9 @@ def main(unused_argv):
   image_output_dir = os.path.join(output_dir, 'sample_iamge')
   tf.gfile.MakeDirs(image_output_dir)
 
+  index = 0
   for label in range(10):
     group_by_label[label].sort(key=operator.itemgetter(0), reverse=True)
-    index = 0
     for confidence, (
         _,
         this_G_z,

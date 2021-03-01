@@ -415,8 +415,7 @@ class CallAndResponseMidiInteraction(MidiInteraction):
         # Reset captured sequence since we are still idling.
         if response_sequence.total_time <= tick_time:
           self._update_state(self.State.IDLE)
-        if self._captor.start_time < tick_time:
-          self._captor.start_time = tick_time
+        self._captor.start_time = max(self._captor.start_time, tick_time)
         self._end_call.clear()
         listen_ticks = 0
       elif (self._end_call.is_set() or

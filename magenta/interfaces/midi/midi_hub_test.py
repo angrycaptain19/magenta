@@ -425,11 +425,8 @@ class MidiHubTest(tf.test.TestCase):
     for msg in self.capture_messages[:-1]:
       threading.Timer(0.2 * msg.time, self.port.callback, args=[msg]).start()
 
-    captured_seqs = []
-    for captured_seq in captor.iterate(
-        signal=midi_hub.MidiSignal(type='note_off')):
-      captured_seqs.append(captured_seq)
-
+    captured_seqs = [captured_seq for captured_seq in captor.iterate(
+        signal=midi_hub.MidiSignal(type='note_off'))]
     self.assertLen(captured_seqs, 4)
 
     expected_seq = music_pb2.NoteSequence()

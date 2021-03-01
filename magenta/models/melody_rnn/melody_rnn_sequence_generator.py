@@ -124,9 +124,10 @@ class MelodyRnnSequenceGenerator(sequence_generator.BaseSequenceGenerator):
         'branch_factor': lambda arg: arg.int_value,
         'steps_per_iteration': lambda arg: arg.int_value
     }
-    args = dict((name, value_fn(generator_options.args[name]))
-                for name, value_fn in arg_types.items()
-                if name in generator_options.args)
+    args = {
+        name: value_fn(generator_options.args[name])
+        for name, value_fn in arg_types.items() if name in generator_options.args
+    }
 
     generated_melody = self._model.generate_melody(
         end_step - melody.start_step, melody, **args)

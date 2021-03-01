@@ -106,19 +106,19 @@ class DynamicDecodeRNNTest(tf.test.TestCase):
 
   def _testDynamicDecodeRNNWithTrainingHelperMatchesDynamicRNN(  # pylint:disable=invalid-name
       self, use_sequence_length):
-    sequence_length = [3, 4, 3, 1, 0]
-    batch_size = 5
-    max_time = 8
-    input_depth = 7
-    cell_depth = 10
-    max_out = max(sequence_length)
-
     with self.session(use_gpu=True) as sess:
+      batch_size = 5
+      max_time = 8
+      input_depth = 7
       inputs = np.random.randn(batch_size, max_time,
                                input_depth).astype(np.float32)
 
+      cell_depth = 10
       cell = tf.nn.rnn_cell.LSTMCell(cell_depth)
       zero_state = cell.zero_state(dtype=tf.float32, batch_size=batch_size)
+      sequence_length = [3, 4, 3, 1, 0]
+      max_out = max(sequence_length)
+
       helper = seq2seq.TrainingHelper(inputs, sequence_length)
       my_decoder = seq2seq.BasicDecoder(
           cell=cell, helper=helper, initial_state=zero_state)
@@ -169,20 +169,20 @@ class DynamicDecodeRNNTest(tf.test.TestCase):
 class BasicDecoderTest(tf.test.TestCase):
 
   def _testStepWithTrainingHelper(self, use_output_layer):  # pylint:disable=invalid-name
-    sequence_length = [3, 4, 3, 1, 0]
-    batch_size = 5
-    max_time = 8
-    input_depth = 7
-    cell_depth = 10
-    output_layer_depth = 3
-
     with self.session(use_gpu=True) as sess:
+      batch_size = 5
+      max_time = 8
+      input_depth = 7
       inputs = np.random.randn(batch_size, max_time,
                                input_depth).astype(np.float32)
+      cell_depth = 10
       cell = tf.nn.rnn_cell.LSTMCell(cell_depth)
+      sequence_length = [3, 4, 3, 1, 0]
       helper = seq2seq.TrainingHelper(
           inputs, sequence_length, time_major=False)
       if use_output_layer:
+        output_layer_depth = 3
+
         output_layer = tf.layers.Dense(output_layer_depth, use_bias=False)
         expected_output_depth = output_layer_depth
       else:
@@ -402,7 +402,6 @@ class BasicDecoderTest(tf.test.TestCase):
   def testStepWithInferenceHelperCategorical(self):
     batch_size = 5
     vocabulary_size = 7
-    cell_depth = vocabulary_size
     start_token = 0
     end_token = 6
 
@@ -419,8 +418,8 @@ class BasicDecoderTest(tf.test.TestCase):
 
     with self.session(use_gpu=True) as sess:
       with tf.variable_scope(
-          "testStepWithInferenceHelper",
-          initializer=tf.constant_initializer(0.01)):
+              "testStepWithInferenceHelper",
+              initializer=tf.constant_initializer(0.01)):
         cell = tf.nn.rnn_cell.LSTMCell(vocabulary_size)
         helper = seq2seq.InferenceHelper(
             sample_fn, sample_shape=(), sample_dtype=tf.int32,
@@ -433,6 +432,7 @@ class BasicDecoderTest(tf.test.TestCase):
                 dtype=tf.float32, batch_size=batch_size))
         output_size = my_decoder.output_size
         output_dtype = my_decoder.output_dtype
+        cell_depth = vocabulary_size
         self.assertEqual(
             seq2seq.BasicDecoderOutput(cell_depth, tf.TensorShape([])),
             output_size)
@@ -481,10 +481,7 @@ class BasicDecoderTest(tf.test.TestCase):
   def testStepWithInferenceHelperMultilabel(self):
     batch_size = 5
     vocabulary_size = 7
-    cell_depth = vocabulary_size
     start_token = 0
-    end_token = 6
-
     start_inputs = tf.one_hot(
         np.ones(batch_size) * start_token,
         vocabulary_size)
@@ -494,13 +491,16 @@ class BasicDecoderTest(tf.test.TestCase):
         lambda x: seq2seq.bernoulli_sample(logits=x, dtype=tf.bool))
     # The next inputs are a one-hot encoding of the sampled labels.
     next_inputs_fn = tf.to_float
-    end_fn = lambda sample_ids: sample_ids[:, end_token]
-
     with self.session(use_gpu=True) as sess:
       with tf.variable_scope(
-          "testStepWithInferenceHelper",
-          initializer=tf.constant_initializer(0.01)):
+              "testStepWithInferenceHelper",
+              initializer=tf.constant_initializer(0.01)):
         cell = tf.nn.rnn_cell.LSTMCell(vocabulary_size)
+        cell_depth = vocabulary_size
+        end_token = 6
+
+        end_fn = lambda sample_ids: sample_ids[:, end_token]
+
         helper = seq2seq.InferenceHelper(
             sample_fn, sample_shape=[cell_depth], sample_dtype=tf.bool,
             start_inputs=start_inputs, end_fn=end_fn,

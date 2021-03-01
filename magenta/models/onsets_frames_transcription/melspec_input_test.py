@@ -88,9 +88,8 @@ class MelspecInputTest(tf.test.TestCase):
 
   def RunTfGraph(self):
     """Return output of running the current graph under TF."""
-    feature_output = self._session.run(
+    return self._session.run(
         self._output, feed_dict={self._input: self._test_waveform})
-    return feature_output
 
   def BuildAndRunTfGraph(self, tflite_compatible=False):
     """Build the graph then run it."""
@@ -151,8 +150,7 @@ class MelspecInputTest(tf.test.TestCase):
                            np.array(self._test_waveform, dtype=np.float32))
     interpreter.invoke()
     output_details = interpreter.get_output_details()
-    output_data = interpreter.get_tensor(output_details[0]['index'])
-    return output_data
+    return interpreter.get_tensor(output_details[0]['index'])
 
   def testTfLiteGraphUnderTfLite(self):
     """Verify output of tflite interpreter matches plain TF output."""

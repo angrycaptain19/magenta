@@ -40,8 +40,7 @@ def get_module(module_path):
     module: Imported module.
   """
   import_path = "magenta.models.nsynth."
-  module = importlib.import_module(import_path + module_path)
-  return module
+  return importlib.import_module(import_path + module_path)
 
 
 def load_audio(path, sample_length=64000, sr=16000):
@@ -351,11 +350,8 @@ def batch_specgram(audio,
   """Computes specgram in a batch."""
   assert len(audio.shape) == 2
   batch_size = audio.shape[0]
-  res = []
-  for b in range(batch_size):
-    res.append(
-        specgram(audio[b], n_fft, hop_length, mask, log_mag, re_im, dphase,
-                 mag_only))
+  res = [specgram(audio[b], n_fft, hop_length, mask, log_mag, re_im, dphase,
+                 mag_only) for b in range(batch_size)]
   return np.array(res)
 
 
@@ -371,11 +367,8 @@ def batch_ispecgram(spec,
   """Computes inverse specgram in a batch."""
   assert len(spec.shape) == 4
   batch_size = spec.shape[0]
-  res = []
-  for b in range(batch_size):
-    res.append(
-        ispecgram(spec[b, :, :, :], n_fft, hop_length, mask, log_mag, re_im,
-                  dphase, mag_only, num_iters))
+  res = [ispecgram(spec[b, :, :, :], n_fft, hop_length, mask, log_mag, re_im,
+                  dphase, mag_only, num_iters) for b in range(batch_size)]
   return np.array(res)
 
 
@@ -410,10 +403,9 @@ def tf_ispecgram(spec,
     x = tf.concat([spec, tf.zeros([dims[0], 1, dims[2], dims[3]])], 1)
   else:
     x = spec
-  audio = tf.py_func(batch_ispecgram, [
+  return tf.py_func(batch_ispecgram, [
       x, n_fft, hop_length, mask, log_mag, re_im, dphase, mag_only, num_iters
   ], tf.float32)
-  return audio
 
 
 #---------------------------------------------------
@@ -750,7 +742,7 @@ def conv2d(x,
     # Apply a stack of convolutions Before adding residual
     for layer_idx in range(stacked_layers):
       with slim.arg_scope(
-          slim_batchnorm_arg_scope(is_training, activation_fn=None)):
+                slim_batchnorm_arg_scope(is_training, activation_fn=None)):
         # Use interpolation to upsample instead of conv_transpose
         if transpose and resize:
           unused_mb, h, w, unused_ch = x.get_shape().as_list()
@@ -795,9 +787,7 @@ def conv2d(x,
                     activation_fn=None,
                     biases_initializer=tf.zeros_initializer,
                     scope=scope + "_residual")
-                x += x0
-              else:
-                x += x0
+              x += x0
         if activation_fn and not gated:
           x = activation_fn(x)
     return x

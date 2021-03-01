@@ -106,8 +106,7 @@ class DecoderLatentFull(snt.AbstractModule):
     for l in self.layers:
       x = tf.nn.relu(snt.Linear(l)(x))
 
-    mu = affine(x, self.output_size, z, residual=self.residual, softplus=False)
-    return mu
+    return affine(x, self.output_size, z, residual=self.residual, softplus=False)
 
 
 class VAE(snt.AbstractModule):
@@ -181,13 +180,12 @@ class VAE(snt.AbstractModule):
     if beta == 0:
       prior_loss = tf.constant(0.0)
     else:
-      if config['prior_loss'].lower() == 'KL'.lower():
-        KL_qp = ds.kl_divergence(ds.Normal(loc=mu, scale=sigma), p_z)
-        KL = tf.reduce_sum(KL_qp, axis=-1)
-        mean_KL = tf.reduce_mean(KL)
-        prior_loss = mean_KL
-      else:
+      if config['prior_loss'].lower() != 'KL'.lower():
         raise NotImplementedError()
+      KL_qp = ds.kl_divergence(ds.Normal(loc=mu, scale=sigma), p_z)
+      KL = tf.reduce_sum(KL_qp, axis=-1)
+      mean_KL = tf.reduce_mean(KL)
+      prior_loss = mean_KL
     # pylint:enable=invalid-name
 
     # VAE Loss

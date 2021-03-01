@@ -108,7 +108,7 @@ def linear_to_mel_weight_matrix(num_mel_bins=20,
 
   freq_res = nyquist_hertz / float(num_spectrogram_bins)
   freq_th = 1.5 * freq_res
-  for i in range(0, num_mel_bins):
+  for i in range(num_mel_bins):
     center_hz = mel_to_hertz(center_mel[i])
     lower_hz = mel_to_hertz(lower_edge_mel[i])
     upper_hz = mel_to_hertz(upper_edge_mel[i])
@@ -165,8 +165,7 @@ def diff(x, axis=-1):
   size[axis] -= 1
   slice_front = tf.slice(x, begin_front, size)
   slice_back = tf.slice(x, begin_back, size)
-  d = slice_front - slice_back
-  return d
+  return slice_front - slice_back
 
 
 def unwrap(p, discont=np.pi, axis=-1):
@@ -192,8 +191,7 @@ def unwrap(p, discont=np.pi, axis=-1):
   shape = p.get_shape().as_list()
   shape[axis] = 1
   ph_cumsum = tf.concat([tf.zeros(shape, dtype=p.dtype), ph_cumsum], axis=axis)
-  unwrapped = p + ph_cumsum
-  return unwrapped
+  return p + ph_cumsum
 
 
 def instantaneous_frequency(phase_angle, time_axis=-2, use_unwrap=True):

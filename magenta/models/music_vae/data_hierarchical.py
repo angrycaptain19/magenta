@@ -522,9 +522,8 @@ class MultiInstrumentPerformanceConverter(
     # Performance sequences require sustain to be correctly interpreted.
     note_sequence = note_seq.apply_sustain_control_changes(note_sequence)
 
-    if self._chord_encoding and not any(
-        ta.annotation_type == CHORD_SYMBOL
-        for ta in note_sequence.text_annotations):
+    if self._chord_encoding and all(ta.annotation_type != CHORD_SYMBOL
+                                    for ta in note_sequence.text_annotations):
       try:
         # Quantize just for the purpose of chord inference.
         # TODO(iansimon): Allow chord inference in unquantized sequences.

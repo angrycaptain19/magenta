@@ -46,8 +46,7 @@ def tf_batch_image(b, mb=36):
   b = tf.concat(
       [b[:mb], tf.zeros([diff, b_shape[1], b_shape[2], b_shape[3]])], axis=0)
   tmp = tf.reshape(b, [-1, cols * b_shape[1], b_shape[2], b_shape[3]])
-  img = tf.concat([tmp[i:i + 1] for i in range(rows)], axis=2)
-  return img
+  return tf.concat([tmp[i:i + 1] for i in range(rows)], axis=2)
 
 
 class EncoderMNIST(snt.AbstractModule):
@@ -78,8 +77,7 @@ class DecoderMNIST(snt.AbstractModule):
   def _build(self, x):
     for size in self.layers:
       x = tf.nn.relu(snt.Linear(size)(x))
-    logits = snt.Linear(self.n_out)(x)
-    return logits
+    return snt.Linear(self.n_out)(x)
 
 
 class EncoderConv(snt.AbstractModule):
@@ -133,8 +131,7 @@ class DecoderConv(snt.AbstractModule):
         h = snt.Conv2DTranspose(l[0], None, l[1], l[2])(h)
       else:
         h = tf.nn.relu(snt.Conv2DTranspose(l[0], None, l[1], l[2])(h))
-    logits = h
-    return logits
+    return h
 
 
 class ClassifierConv(snt.AbstractModule):
@@ -156,8 +153,7 @@ class ClassifierConv(snt.AbstractModule):
 
     h_shape = h.get_shape().as_list()
     h = tf.reshape(h, [-1, h_shape[1] * h_shape[2] * h_shape[3]])
-    logits = snt.Linear(self.output_size)(h)
-    return logits
+    return snt.Linear(self.output_size)(h)
 
 
 class GFull(snt.AbstractModule):
@@ -175,8 +171,7 @@ class GFull(snt.AbstractModule):
     x = snt.Linear(2 * self.n_latent)(x)
     dz = x[:, :self.n_latent]
     gates = tf.nn.sigmoid(x[:, self.n_latent:])
-    z_prime = (1 - gates) * z + gates * dz
-    return z_prime
+    return (1 - gates) * z + gates * dz
 
 
 class DFull(snt.AbstractModule):
@@ -190,5 +185,4 @@ class DFull(snt.AbstractModule):
   def _build(self, x):
     for l in self.layers:
       x = tf.nn.relu(snt.Linear(l)(x))
-    logits = snt.Linear(self.output_size)(x)
-    return logits
+    return snt.Linear(self.output_size)(x)

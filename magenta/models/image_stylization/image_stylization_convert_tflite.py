@@ -90,10 +90,7 @@ def _convert_to_tflite(saved_model_dir, num_styles, image_size, quantize,
   """Convert a image stylization saved model to TensorFlow Lite format."""
   # Append filename if output_model is a directory name
   if tf.io.gfile.isdir(output_model):
-    if quantize:
-      filename = 'stylize_quantized.tflite'
-    else:
-      filename = 'stylize.tflite'
+    filename = 'stylize_quantized.tflite' if quantize else 'stylize.tflite'
     output_model = os.path.join(output_model, filename)
 
   # Initialize TF Lite Converter

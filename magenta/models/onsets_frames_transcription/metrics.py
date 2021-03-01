@@ -277,12 +277,11 @@ def calculate_metrics(frame_probs,
 
     def _metrics(precision, recall, f1, name):
       """Create and return a dict of metrics."""
-      metrics = {
+      return {
           _add_prefix(name) + '_precision': precision,
           _add_prefix(name) + '_recall': recall,
           _add_prefix(name) + '_f1_score': f1,
       }
-      return metrics
 
     frame_metrics = calculate_frame_metrics(
         frame_labels=frame_labels,

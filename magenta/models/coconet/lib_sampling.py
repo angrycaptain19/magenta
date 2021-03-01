@@ -48,11 +48,10 @@ class BaseSampler(lib_util.Factory):
     self.logger = logger if logger is not None else lib_logging.NoLogger()
 
     def predictor(pianorolls, masks):
-      predictions = self.wmodel.sess.run(self.wmodel.model.predictions, {
+      return self.wmodel.sess.run(self.wmodel.model.predictions, {
           self.wmodel.model.pianorolls: pianorolls,
           self.wmodel.model.masks: masks
       })
-      return predictions
 
     self.predictor = lib_tfutil.RobustPredictor(predictor)
 

@@ -61,21 +61,19 @@ def main(unused_argv):
         tf.gfile.IsDirectory(os.path.join(FLAGS.eval_logdir, i))]
     if EVAL_SUBDIR in possible_checkpoint_dirs:
       possible_checkpoint_dirs.remove(EVAL_SUBDIR)
-    if len(possible_checkpoint_dirs) == 1:
-      checkpoint_dir = os.path.join(
-          FLAGS.eval_logdir, possible_checkpoint_dirs[0])
-      tf.logging.info('Using checkpoint dir: %s', checkpoint_dir)
-    else:
+    if len(possible_checkpoint_dirs) != 1:
       raise ValueError(
           'Need to provide a path to checkpoint directory or use an '
           'eval_logdir with only 1 checkpoint subdirectory.')
+    checkpoint_dir = os.path.join(
+        FLAGS.eval_logdir, possible_checkpoint_dirs[0])
+    tf.logging.info('Using checkpoint dir: %s', checkpoint_dir)
   wmodel = lib_graph.load_checkpoint(checkpoint_dir)
   if FLAGS.eval_logdir is None:
     raise ValueError(
         'Set flag eval_logdir to specify a path for saving eval statistics.')
-  else:
-    eval_logdir = os.path.join(FLAGS.eval_logdir, EVAL_SUBDIR)
-    tf.gfile.MakeDirs(eval_logdir)
+  eval_logdir = os.path.join(FLAGS.eval_logdir, EVAL_SUBDIR)
+  tf.gfile.MakeDirs(eval_logdir)
 
   evaluator = lib_evaluation.BaseEvaluator.make(
       FLAGS.unit, wmodel=wmodel, chronological=FLAGS.chronological)

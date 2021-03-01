@@ -52,8 +52,7 @@ class BaseDataset(object):
     for k, v in pitch_counts.items():
       all_pitches.extend([k]*v)
     sample_pitches = np.random.choice(all_pitches, num_samples)
-    pitch_counter = Counter(sample_pitches)
-    return pitch_counter
+    return Counter(sample_pitches)
 
 
 class NSynthTfdsDataset(BaseDataset):
@@ -87,8 +86,7 @@ class NSynthTfdsDataset(BaseDataset):
     counts = [pitch_counts[p] for p in pitches]
     indices = tf.reshape(
         tf.multinomial(tf.log([tf.to_float(counts)]), batch_size), [batch_size])
-    one_hot_labels = tf.one_hot(indices, depth=len(pitches))
-    return one_hot_labels
+    return tf.one_hot(indices, depth=len(pitches))
 
   def provide_dataset(self):
     """Provides dataset (audio, labels) of nsynth."""
@@ -121,7 +119,7 @@ class NSynthTfdsDataset(BaseDataset):
     return dataset
 
   def get_pitch_counts(self):
-    pitch_counts = {
+    return {
         24: 551,
         25: 545,
         26: 561,
@@ -184,7 +182,6 @@ class NSynthTfdsDataset(BaseDataset):
         83: 959,
         84: 977,
     }
-    return pitch_counts
 
 
 registry = {

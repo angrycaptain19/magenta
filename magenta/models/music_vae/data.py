@@ -85,10 +85,9 @@ def _maybe_pad_seqs(seqs, dtype, depth):
   lengths = [len(s) for s in seqs]
   if len(set(lengths)) == 1:
     return np.array(seqs, dtype)
-  else:
-    length = max(lengths)
-    return (np.array([np.pad(s, [(0, length - len(s)), (0, 0)], mode='constant')
-                      for s in seqs], dtype))
+  length = max(lengths)
+  return (np.array([np.pad(s, [(0, length - len(s)), (0, 0)], mode='constant')
+                    for s in seqs], dtype))
 
 
 def _extract_instrument(note_sequence, instrument):
@@ -103,11 +102,11 @@ def maybe_sample_items(seq, sample_size, randomize):
   """Samples a seq if `sample_size` is provided and less than seq size."""
   if not sample_size or len(seq) <= sample_size:
     return seq
-  if randomize:
-    indices = set(np.random.choice(len(seq), size=sample_size, replace=False))
-    return [seq[i] for i in indices]
-  else:
+  if not randomize:
     return seq[:sample_size]
+
+  indices = set(np.random.choice(len(seq), size=sample_size, replace=False))
+  return [seq[i] for i in indices]
 
 
 def combine_converter_tensors(converter_tensors, max_num_tensors=None,
@@ -156,10 +155,8 @@ class NoteSequenceAugmenter(object):
     Returns:
       The randomly augmented NoteSequence.
     """
-    transpose_min, transpose_max = (
-        self._transpose_range if self._transpose_range else (0, 0))
-    stretch_min, stretch_max = (
-        self._stretch_range if self._stretch_range else (1.0, 1.0))
+    transpose_min, transpose_max = self._transpose_range or (0, 0)
+    stretch_min, stretch_max = self._stretch_range or (1.0, 1.0)
 
     return sequences_lib.augment_note_sequence(
         note_sequence,
@@ -457,8 +454,7 @@ class LegacyEventListOneHotConverter(BaseNoteSequenceConverter):
     # be mapped to identical tensors by the encoder_decoder (e.g., Drums).
 
     if self._dedupe_event_lists:
-      multievent_tuples = list(
-          set(tuple(l) for l in sliced_multievent_lists))
+      multievent_tuples = list({tuple(l) for l in sliced_multievent_lists})
     else:
       multievent_tuples = [tuple(l) for l in sliced_multievent_lists]
     multievent_tuples = maybe_sample_items(
@@ -537,10 +533,10 @@ class LegacyEventListOneHotConverter(BaseNoteSequenceConverter):
             note_seq.NegativeTimeError) as e:
       return ConverterTensors()
 
-    if (self._chord_encoding and not any(
-        ta.annotation_type == CHORD_SYMBOL
-        for ta in quantized_sequence.text_annotations)) or (
-            self._condition_on_key and not quantized_sequence.key_signatures):
+    if (self._chord_encoding
+        and all(ta.annotation_type != CHORD_SYMBOL
+                for ta in quantized_sequence.text_annotations)
+        or (self._condition_on_key and not quantized_sequence.key_signatures)):
       # We are conditioning on chords and/or key but sequence does not have
       # them. Try to infer chords and optionally key.
       try:
@@ -606,13 +602,10 @@ class LegacyEventListOneHotConverter(BaseNoteSequenceConverter):
     else:
       control_seqs = []
 
-    seqs = []
-    for t in unique_event_tuples:
-      seqs.append(np_onehot(
+    seqs = [np_onehot(
           [self._legacy_encoder_decoder.encode_event(e) for e in t] +
           ([] if self.end_token is None else [self.end_token]),
-          self.output_depth, self.output_dtype))
-
+          self.output_depth, self.output_dtype) for t in unique_event_tuples]
     return ConverterTensors(inputs=seqs, outputs=seqs, controls=control_seqs)
 
   def from_tensors(self, samples, controls=None):
@@ -1037,10 +1030,10 @@ class TrioConverter(BaseNoteSequenceConverter):
             note_seq.NegativeTimeError):
       return ConverterTensors()
 
-    if (self._chord_encoding and not any(
-        ta.annotation_type == CHORD_SYMBOL
-        for ta in quantized_sequence.text_annotations)) or (
-            self._condition_on_key and not quantized_sequence.key_signatures):
+    if (self._chord_encoding
+        and all(ta.annotation_type != CHORD_SYMBOL
+                for ta in quantized_sequence.text_annotations)
+        or (self._condition_on_key and not quantized_sequence.key_signatures)):
       # We are conditioning on chords and/or key but sequence does not have
       # them. Try to infer chords and optionally key.
       try:

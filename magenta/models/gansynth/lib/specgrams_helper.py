@@ -160,11 +160,7 @@ class SpecgramsHelper(object):
 
     mag = tf.exp(logmag)
 
-    if self._ifreq:
-      phase_angle = tf.cumsum(p * np.pi, axis=-2)
-    else:
-      phase_angle = p * np.pi
-
+    phase_angle = tf.cumsum(p * np.pi, axis=-2) if self._ifreq else p * np.pi
     return spectral_ops.polar2rect(mag, phase_angle)[:, :, :, tf.newaxis]
 
   def _linear_to_mel_matrix(self):

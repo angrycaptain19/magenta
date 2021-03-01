@@ -14,6 +14,7 @@
 
 """SoX-based audio transform functions for the purpose of data augmentation."""
 
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -69,10 +70,12 @@ DEFAULT_AUDIO_TRANSFORM_HPARAMS = contrib_training.HParams(
     audio_transform_noise_type='pinknoise',
     audio_transform_min_noise_vol=0.0,
     audio_transform_max_noise_vol=0.04,
-    **dict(('audio_transform_%s_%s_%s' % (m, stage_name, param_name), value)
-           for stage_name, params_dict in AUDIO_TRANSFORM_PIPELINE
-           for param_name, (min_value, max_value, _) in params_dict.items()
-           for m, value in [('min', min_value), ('max', max_value)]))
+    **{
+        'audio_transform_%s_%s_%s' % (m, stage_name, param_name): value
+        for stage_name, params_dict in AUDIO_TRANSFORM_PIPELINE
+        for param_name, (min_value, max_value, _) in params_dict.items()
+        for m, value in [('min', min_value), ('max', max_value)]
+    })
 
 
 class AudioTransformParameter(object):
@@ -108,10 +111,9 @@ class AudioTransformParameter(object):
     """
     if self.scale == 'linear':
       return random.uniform(self.min_value, self.max_value)
-    else:
-      log_min_value = math.log(self.min_value)
-      log_max_value = math.log(self.max_value)
-      return math.exp(random.uniform(log_min_value, log_max_value))
+    log_min_value = math.log(self.min_value)
+    log_max_value = math.log(self.max_value)
+    return math.exp(random.uniform(log_min_value, log_max_value))
 
 
 class AudioTransformStage(object):
@@ -136,7 +138,7 @@ class AudioTransformStage(object):
           should be applied. No audio will actually be transformed until the
           `build` method is called on `transformer`.
     """
-    args = dict((param.name, param.sample()) for param in self.params)
+    args = {param.name: param.sample() for param in self.params}
     getattr(transformer, self.name)(**args)
 
 
